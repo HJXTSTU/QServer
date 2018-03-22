@@ -113,11 +113,11 @@ type StreamBuffer interface {
 	ReadFloat64() float64
 	WriteFloat64(float64)
 
-	ReadLine()string
+	ReadLine() string
 	WriteLine(str string)
 
 	ReadNBytes(n int) []byte
-	WriteNBytes(b []byte,n int)
+	WriteNBytes(b []byte, n int)
 
 	Write(p []byte) (n int, err error)
 
@@ -131,7 +131,7 @@ type StreamBuffer interface {
 
 	Undo()
 
-
+	InsertLen()
 }
 
 type UndoOffset int
@@ -144,17 +144,26 @@ type stream struct {
 	undoOffset UndoOffset
 }
 
-func (this *stream)ReadLine()string{
+func (this *stream) InsertLen() {
+	l := this.Len()
+	b := make([]byte, l)
+	copy(b, this.buf[this.cur:this.off])
+	this.buf = make([]byte, l+4)
+	this.WriteInt(l)
+	this.Append(b)
+}
+
+func (this *stream) ReadLine() string {
 	endl := this.cur
-	for this.buf[endl]!='\n'&&endl<this.off{
+	for this.buf[endl] != '\n' && endl < this.off {
 		endl++
 	}
-	start:=this.cur
-	this.cur=endl+1;
+	start := this.cur
+	this.cur = endl + 1;
 	return string(this.buf[start:endl])
 }
 
-func (this *stream)WriteLine(str string){
+func (this *stream) WriteLine(str string) {
 	bytes := []byte(str)
 	this.Append(bytes)
 	this.WriteByte('\n')
@@ -260,13 +269,13 @@ func (this *stream) ReadNBytes(n int) []byte {
 	if this.cur == this.off {
 		defer this.Renew()
 	}
-	res := make([]byte,n)
-	copy(res,this.buf[cur:cur+n])
+	res := make([]byte, n)
+	copy(res, this.buf[cur:cur+n])
 	return res
 }
 
-func (this *stream)WriteNBytes(b []byte,n int){
-	if len(b)<n {
+func (this *stream) WriteNBytes(b []byte, n int) {
+	if len(b) < n {
 		n = len(b)
 	}
 	this.Append(b[:n])

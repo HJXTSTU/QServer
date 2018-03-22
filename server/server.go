@@ -1,9 +1,10 @@
 package server
 
 import (
-	"socket_component/server/listener"
-	"socket_component/server/connection"
+	"projects/socket_component/server/listener"
+	"projects/socket_component/server/connection"
 	"net"
+	"fmt"
 )
 
 type QServerHandle interface {
@@ -56,6 +57,9 @@ func (this *QServer) onClose(handle connection.TokenHandler) {
 	//TODO::关闭TOKEN
 	handle.Close()
 	this.tokens.DeleteToken(handle)
+	this.listener.ReleaseConn()
+	fmt.Println("Remain:",this.tokens.Len())
+
 }
 
 func NewQServer(address string) QServerHandle {

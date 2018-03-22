@@ -2,8 +2,9 @@ package connection
 
 import (
 	"net"
-	"socket_component/util"
+	"projects/socket_component/util"
 	"sync"
+	"log"
 )
 
 const (
@@ -70,12 +71,11 @@ type QToken struct {
 }
 
 func (this *QToken) SendAsync(b []byte, callback SendCallback) {
-	w_stream := util.NewStreamBuffer()
-	w_stream.WriteInt(len(b))
-	w_stream.Append(b)
-	n, err := this.conn.Write(w_stream.Bytes())
-	if callback != nil {
+	n, err := this.conn.Write(b)
+	if err == nil && callback != nil{
 		callback(this, b, n, err)
+	}else{
+		log.Fatal(err)
 	}
 }
 
