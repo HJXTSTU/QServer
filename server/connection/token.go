@@ -2,7 +2,7 @@ package connection
 
 import (
 	"net"
-	"projects/socket_component/util"
+	"socket_component/util"
 	"sync"
 )
 

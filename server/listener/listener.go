@@ -8,22 +8,29 @@ import (
 type AcceptFunc func(conn net.Conn)
 
 type ListenerHandle interface{
-	AcceptAsync(onAccept AcceptFunc)
+	AsyncAccept(onAccept AcceptFunc)
+	SyncAccept(onAccept AcceptFunc)
 }
 type QListener struct {
 	listener net.Listener
 }
 
-func (this *QListener) AcceptAsync(onAccept AcceptFunc) {
-	go func(onAccept AcceptFunc) {
-		for {
-			conn, err := this.listener.Accept()
-			if err != nil {
-				panic(err)
-			}
-			go onAccept(conn)
+func (this *QListener)accept(onAccept AcceptFunc) {
+	for {
+		conn, err := this.listener.Accept()
+		if err != nil {
+			panic(err)
 		}
-	}(onAccept)
+		go onAccept(conn)
+	}
+}
+
+func (this *QListener) AsyncAccept(onAccept AcceptFunc) {
+	go this.accept(onAccept)
+}
+
+func (this *QListener) SyncAccept(onAccept AcceptFunc)  {
+	this.accept(onAccept)
 }
 
 func NewListener(address string) ListenerHandle {
@@ -32,6 +39,6 @@ func NewListener(address string) ListenerHandle {
 	if err != nil {
 		panic(err)
 	}
-	listener.listener = l;
+	listener.listener = l
 	return &listener
 }

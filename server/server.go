@@ -1,14 +1,17 @@
 package server
 
 import (
-	"projects/socket_component/server/listener"
-	"projects/socket_component/server/connection"
+	"socket_component/server/listener"
+	"socket_component/server/connection"
 	"net"
 	"fmt"
 )
 
 type QServerHandle interface {
-	Listen()
+
+	AsyncListen()
+
+	SyncListen()
 
 	SetProcesser(QProcesser)
 }
@@ -27,8 +30,12 @@ type QServer struct {
 	processer QProcesser
 }
 
-func (this *QServer) Listen() {
-	this.listener.AcceptAsync(this.onAccept)
+func (this *QServer) AsyncListen() {
+	this.listener.AsyncAccept(this.onAccept)
+}
+
+func (this *QServer) SyncListen() {
+	this.listener.SyncAccept(this.onAccept)
 }
 
 func (this *QServer) onAccept(conn net.Conn) {
