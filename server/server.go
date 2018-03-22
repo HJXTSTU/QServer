@@ -4,7 +4,6 @@ import (
 	"socket_component/server/listener"
 	"socket_component/server/connection"
 	"net"
-	"fmt"
 )
 
 type QServerHandle interface {
@@ -42,6 +41,7 @@ func (this *QServer) onAccept(conn net.Conn) {
 	token := connection.NewQToken(conn, this.onRead, this.onClose)
 	this.tokens.AddToken(token)
 	token.ReadAsync()
+	//this.listener.AcceptAsync(this.onAccept)
 }
 
 func (this *QServer) onRead(handle connection.TokenHandler, n int, bytes []byte) {
@@ -54,10 +54,8 @@ func (this *QServer) SetProcesser(p QProcesser) {
 
 func (this *QServer) onClose(handle connection.TokenHandler) {
 	//TODO::关闭TOKEN
-	fmt.Println(handle.RemoteAddr()," Close")
 	handle.Close()
 	this.tokens.DeleteToken(handle)
-
 }
 
 func NewQServer(address string) QServerHandle {

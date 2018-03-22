@@ -5,6 +5,7 @@ import (
 	"socket_component/server/connection"
 	"socket_component/util"
 	"socket_component/server"
+	"time"
 )
 
 type TopProcesser struct{
@@ -22,9 +23,7 @@ func (this *TopProcesser)Processe(token connection.TokenHandler,length int,bytes
 	sd.WriteInt(stream.Len())
 	sd.WriteNBytes(stream.Bytes(),stream.Len())
 	token.SendAsync(sd.Bytes(), func(handler connection.TokenHandler, bytes []byte, i int, e error) {
-		if e == nil{
-			fmt.Printf("Send sucessful.\n")
-		}
+		fmt.Println("Send Successful")
 	})
 }
 

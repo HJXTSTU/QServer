@@ -4,7 +4,6 @@ import (
 	"net"
 )
 
-
 type AcceptFunc func(conn net.Conn)
 
 type ListenerHandle interface{
@@ -14,6 +13,7 @@ type ListenerHandle interface{
 type QListener struct {
 	listener net.Listener
 }
+
 
 func (this *QListener)accept(onAccept AcceptFunc) {
 	for {
