@@ -6,15 +6,16 @@ import (
 
 type AcceptFunc func(conn net.Conn)
 
-type ListenerHandle interface {
-	AcceptAsync(onAccept AcceptFunc)
+type ListenerHandle interface{
+	AsyncAccept(onAccept AcceptFunc)
+	SyncAccept(onAccept AcceptFunc)
 }
 type QListener struct {
 	listener net.Listener
 }
 
-func (this *QListener) AcceptAsync(onAccept AcceptFunc) {
-	//go func(onAccept AcceptFunc) {
+
+func (this *QListener)accept(onAccept AcceptFunc) {
 	for {
 		conn, err := this.listener.Accept()
 		if err != nil {
@@ -22,7 +23,14 @@ func (this *QListener) AcceptAsync(onAccept AcceptFunc) {
 		}
 		go onAccept(conn)
 	}
-	//}(onAccept)
+}
+
+func (this *QListener) AsyncAccept(onAccept AcceptFunc) {
+	go this.accept(onAccept)
+}
+
+func (this *QListener) SyncAccept(onAccept AcceptFunc)  {
+	this.accept(onAccept)
 }
 
 func NewListener(address string) ListenerHandle {
@@ -31,6 +39,6 @@ func NewListener(address string) ListenerHandle {
 	if err != nil {
 		panic(err)
 	}
-	listener.listener = l;
+	listener.listener = l
 	return &listener
 }

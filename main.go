@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"projects/socket_component/server"
-	"projects/socket_component/server/connection"
-	"projects/socket_component/util"
+	"socket_component/server/connection"
+	"socket_component/util"
+	"socket_component/server"
 	"time"
 )
 
@@ -30,13 +30,12 @@ func (this *TopProcesser)Processe(token connection.TokenHandler,length int,bytes
 
 
 func main() {
-	tp := TopProcesser{}
+
 	s := server.NewQServer(":8888")
+	tp := TopProcesser{}
 	s.SetProcesser(&tp)
-	s.Listen()
-	fmt.Println("Server Boot")
-	for{
-		time.Sleep(time.Second)
-	}
+	s.SyncListen()
+
+	fmt.Println("test sync")
 
 }
