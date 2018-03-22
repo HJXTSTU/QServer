@@ -17,6 +17,7 @@ type SendCallback func(TokenHandler, []byte, int, error)
 type TokenPoolHandler interface {
 	AddToken(token TokenHandler)
 	DeleteToken(token TokenHandler)
+	Len() int
 }
 
 type TokenPool struct {
@@ -34,6 +35,13 @@ func (this *TokenPool) DeleteToken(token TokenHandler) {
 	this.mu.Lock()
 	delete(this.tokens, token)
 	this.mu.Unlock()
+}
+
+func (this *TokenPool) Len() int {
+	this.mu.Lock()
+	l := len(this.tokens)
+	this.mu.Unlock()
+	return l
 }
 
 func NewTokenPool() TokenPoolHandler {
@@ -80,8 +88,6 @@ func (this *QToken) ReadAsync() {
 		for {
 			buf := make([]byte, BUFFER_SIZE)
 			n, err := this.conn.Read(buf)
-			//fmt.Println(this.conn.RemoteAddr())
-
 			if n <= 0 || err != nil {
 				break;
 			}

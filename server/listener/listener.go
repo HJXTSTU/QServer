@@ -4,10 +4,9 @@ import (
 	"net"
 )
 
-
 type AcceptFunc func(conn net.Conn)
 
-type ListenerHandle interface{
+type ListenerHandle interface {
 	AcceptAsync(onAccept AcceptFunc)
 }
 type QListener struct {
@@ -15,15 +14,15 @@ type QListener struct {
 }
 
 func (this *QListener) AcceptAsync(onAccept AcceptFunc) {
-	go func(onAccept AcceptFunc) {
-		for {
-			conn, err := this.listener.Accept()
-			if err != nil {
-				panic(err)
-			}
-			go onAccept(conn)
+	//go func(onAccept AcceptFunc) {
+	for {
+		conn, err := this.listener.Accept()
+		if err != nil {
+			panic(err)
 		}
-	}(onAccept)
+		go onAccept(conn)
+	}
+	//}(onAccept)
 }
 
 func NewListener(address string) ListenerHandle {
