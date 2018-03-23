@@ -37,8 +37,4 @@ func main() {
 
 	exit_chan := ossig.GetExitChan()
 	<-exit_chan
-	fmt.Println("test sync")
-	s.Close()
-	ossig.GetGlobalWaitGroup().Wait()
-	fmt.Println("test sync")
 }
