@@ -60,6 +60,8 @@ type TokenHandler interface {
 
 	RemoteAddr() net.Addr
 
+	read(b []byte)(int,error)
+
 	SendAsync(b []byte, callback SendCallback)
 }
 
@@ -79,6 +81,10 @@ func (this *QToken) SendAsync(b []byte, callback SendCallback) {
 	}
 }
 
+func (this *QToken)read(b []byte)(int,error){
+	return this.conn.Read(b)
+}
+
 func (this *QToken) RemoteAddr() net.Addr {
 	return this.conn.RemoteAddr()
 }
@@ -87,7 +93,7 @@ func (this *QToken) ReadAsync() {
 	go func(handle TokenHandler) {
 		for {
 			buf := make([]byte, BUFFER_SIZE)
-			n, err := this.conn.Read(buf)
+			n, err := handle.read(buf)
 			if n <= 0 || err != nil {
 				break;
 			}
