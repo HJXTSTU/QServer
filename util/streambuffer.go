@@ -148,7 +148,7 @@ func (this *stream) InsertLen() {
 	l := this.Len()
 	b := make([]byte, l)
 	copy(b, this.buf[this.cur:this.off])
-	this.buf = make([]byte, l+4)
+	this.Renew()
 	this.WriteInt(l)
 	this.Append(b)
 }

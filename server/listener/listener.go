@@ -19,11 +19,16 @@ func init() {
 type ListenerHandle interface{
 	AsyncAccept(onAccept AcceptFunc)
 	SyncAccept(onAccept AcceptFunc)
+	Close()
 	ReleaseConn()
 }
 
 type QListener struct {
 	listener net.Listener
+}
+
+func (this *QListener)Close(){
+	this.listener.Close()
 }
 
 func (this *QListener)ReleaseConn(){
@@ -36,7 +41,7 @@ func (this *QListener)accept(onAccept AcceptFunc) {
 		connLimitChanel<- struct{}{}
 		conn, err := this.listener.Accept()
 		if err != nil {
-			panic(err)
+			break
 		}
 		go onAccept(conn)
 	}

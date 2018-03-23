@@ -18,12 +18,21 @@ type SendCallback func(TokenHandler, []byte, int, error)
 type TokenPoolHandler interface {
 	AddToken(token TokenHandler)
 	DeleteToken(token TokenHandler)
+	CloseAll()
 	Len() int
 }
 
 type TokenPool struct {
 	tokens map[TokenHandler]TokenHandler
 	mu     sync.Mutex
+}
+
+func (this *TokenPool)CloseAll(){
+	this.mu.Lock()
+	for _,v := range this.tokens{
+		v.Close()
+	}
+	this.mu.Unlock()
 }
 
 func (this *TokenPool) AddToken(token TokenHandler) {

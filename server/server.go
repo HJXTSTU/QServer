@@ -13,6 +13,10 @@ type QServerHandle interface {
 
 	SyncListen()
 
+	CloseAllTokens()
+
+	Close()
+
 	SetProcesser(QProcesser)
 }
 
@@ -28,6 +32,11 @@ type QServer struct {
 	listener  listener.ListenerHandle
 	tokens    connection.TokenPoolHandler
 	processer QProcesser
+}
+
+func (this *QServer)Close(){
+	this.CloseAllTokens()
+	this.listener.Close()
 }
 
 func (this *QServer) AsyncListen() {
@@ -60,6 +69,10 @@ func (this *QServer) onClose(handle connection.TokenHandler) {
 	this.listener.ReleaseConn()
 	fmt.Println("Remain:",this.tokens.Len())
 
+}
+
+func (this *QServer)CloseAllTokens(){
+	this.tokens.CloseAll()
 }
 
 func NewQServer(address string) QServerHandle {

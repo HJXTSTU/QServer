@@ -5,6 +5,7 @@ import (
 	"projects/socket_component/server/connection"
 	"projects/socket_component/util"
 	"projects/socket_component/server"
+	"projects/socket_component/ossig"
 )
 
 type TopProcesser struct{
@@ -31,7 +32,13 @@ func main() {
 	s := server.NewQServer(":8888")
 	tp := TopProcesser{}
 	s.SetProcesser(&tp)
-	s.SyncListen()
+	s.AsyncListen()
 	fmt.Println("test sync")
 
+	exit_chan := ossig.GetExitChan()
+	<-exit_chan
+	fmt.Println("test sync")
+	s.Close()
+	ossig.GetGlobalWaitGroup().Wait()
+	fmt.Println("test sync")
 }

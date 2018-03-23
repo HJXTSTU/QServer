@@ -19,3 +19,14 @@ func GetExitChan()<-chan os.Signal{
 	})
 	return signal_exit
 }
+
+var goroutines_wait sync.WaitGroup
+
+var wait_one sync.Once
+
+func GetGlobalWaitGroup()sync.WaitGroup{
+	one.Do(func() {
+		goroutines_wait= sync.WaitGroup{}
+	})
+	return goroutines_wait
+}
