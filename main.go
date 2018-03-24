@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"projects/socket_component/server/connection"
-	"projects/socket_component/util"
+	"wwt/util"
 	"projects/socket_component/server"
-	"projects/socket_component/ossig"
+	"projects/socket_component/ctrl"
+	"os"
 )
 
 type TopProcesser struct{
@@ -33,8 +34,11 @@ func main() {
 	tp := TopProcesser{}
 	s.SetProcesser(&tp)
 	s.AsyncListen()
-	fmt.Println("test sync")
 
-	exit_chan := ossig.GetExitChan()
+	goroutine_group := ctrl.GlobalWaitGroup()
+	exit_chan := ctrl.GlobalExitChan()
 	<-exit_chan
+	s.Close()
+	goroutine_group.Wait()
+	os.Exit(0)
 }

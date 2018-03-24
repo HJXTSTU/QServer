@@ -2,6 +2,8 @@ package listener
 
 import (
 	"net"
+	"projects/socket_component/ctrl"
+	"log"
 )
 
 const(
@@ -29,6 +31,7 @@ type QListener struct {
 
 func (this *QListener)Close(){
 	this.listener.Close()
+	log.Println("QListener:Close listener.")
 }
 
 func (this *QListener)ReleaseConn(){
@@ -37,18 +40,23 @@ func (this *QListener)ReleaseConn(){
 
 
 func (this *QListener)accept(onAccept AcceptFunc) {
+
 	for {
 		connLimitChanel<- struct{}{}
 		conn, err := this.listener.Accept()
 		if err != nil {
 			break
 		}
-		go onAccept(conn)
+		ctrl.StartGoroutines(func() {
+			onAccept(conn)
+		})
 	}
 }
 
 func (this *QListener) AsyncAccept(onAccept AcceptFunc) {
-	go this.accept(onAccept)
+	ctrl.StartGoroutines(func() {
+		this.accept(onAccept)
+	})
 }
 
 func (this *QListener) SyncAccept(onAccept AcceptFunc)  {

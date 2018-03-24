@@ -2,9 +2,11 @@ package connection
 
 import (
 	"net"
-	"projects/socket_component/util"
+	"wwt/util"
 	"sync"
 	"log"
+	"projects/socket_component/ctrl"
+	"fmt"
 )
 
 const (
@@ -98,19 +100,30 @@ func (this *QToken) RemoteAddr() net.Addr {
 	return this.conn.RemoteAddr()
 }
 
-func (this *QToken) ReadAsync() {
-	go func(handle TokenHandler) {
-		for {
-			buf := make([]byte, BUFFER_SIZE)
-			n, err := handle.read(buf)
-			if n <= 0 || err != nil {
-				break;
-			}
-			handle.OnRead(handle, n, buf[:n])
+func (this *QToken)readAsync(handle TokenHandler){
+	defer func() {
+		err := recover().(error)
+		if err.Error()=="EOF"{
+			handle.OnClose(handle)
 		}
-		// TODO::onClose
-		handle.OnClose(handle)
-	}(this)
+	}()
+	for {
+		buf := make([]byte, BUFFER_SIZE)
+		n, err := handle.read(buf)
+		if n<=0 || err != nil{
+			panic(err)
+			break;
+		}
+		handle.OnRead(handle, n, buf[:n])
+	}
+	// TODO::err process
+
+}
+
+func (this *QToken) ReadAsync() {
+	ctrl.StartGoroutines(func() {
+		this.readAsync(this)
+	})
 }
 
 func (this *QToken) OnRead(handle TokenHandler, n int, bytes []byte) {
@@ -123,7 +136,10 @@ func (this *QToken) OnRead(handle TokenHandler, n int, bytes []byte) {
 	//	数据包已经完整
 	if length <= lstream {
 		data := this.r_stream.ReadNBytes(length)
-		go this.onRead(this, length, data)
+		ctrl.StartGoroutines(func() {
+			this.onRead(this, length, data)
+		})
+		//go this.onRead(this,length,data)
 	} else {
 		this.r_stream.Undo()
 	}
@@ -131,10 +147,14 @@ func (this *QToken) OnRead(handle TokenHandler, n int, bytes []byte) {
 }
 
 func (this *QToken) OnClose(handle TokenHandler) {
-	go this.onClose(this)
+	ctrl.StartGoroutines(func() {
+		this.onClose(handle)
+	})
+	//go this.onClose(this)
 }
 
 func (this *QToken) Close() {
+	fmt.Println("Close:",this.conn.RemoteAddr())
 	this.conn.Close()
 }
 
